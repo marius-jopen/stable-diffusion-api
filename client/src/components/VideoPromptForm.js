@@ -20,7 +20,6 @@ export default function VideoPromptForm() {
         "seed": 2336430259,
         "sampler": "Euler a",
         "steps": 25,
-        "batch_name": "Deforum_20240322181729",
         "seed_behavior": "iter",
         "seed_iter_N": 1,
         "use_init": false,
