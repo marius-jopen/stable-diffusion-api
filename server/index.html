@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Generate Image</title>
+</head>
+<body>
+    <h1>Image Generator</h1>
+    <form id="imageForm">
+        <label for="prompt">Enter your prompt:</label>
+        <input type="text" id="prompt" name="prompt" required>
+        <input type="submit" value="Generate Image">
+    </form>
+    <p id="message"></p>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const form = document.querySelector("form");
+            form.onsubmit = async function(event) {
+                event.preventDefault(); // Prevent the default form submission
+                const prompt = document.getElementById("prompt").value;
+                const response = await fetch('/generate-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: prompt }),
+                });
+                if (response.ok) {
+                    document.getElementById("message").textContent = "Image generated and saved successfully!";
+                } else {
+                    document.getElementById("message").textContent = "Error generating or saving the image.";
+                }
+            }
+        });
+    </script>
+</body>
+</html>
