@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function PromptForm() {
+export default function VideoPromptForm() {
   const [prompt, setPrompt] = useState('');
   const [negativePrompt, setNegativePrompt] = useState('');
 
@@ -22,7 +22,7 @@ export default function PromptForm() {
     };
 
     try {
-      const response = await fetch('/generate-image', {
+      const response = await fetch('/generate-video', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

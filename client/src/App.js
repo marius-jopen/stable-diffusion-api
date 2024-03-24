@@ -1,11 +1,12 @@
 import React from 'react';
-import PromptForm from './components/PromptForm';
+import ImagePromptForm from './components/ImagePromptForm';
+import VideoPromptForm from './components/VideoPromptForm';
 
 function App() {
   return (
     <div className="App">
-      <h1>Image Generator</h1>
-      <PromptForm />
+      <ImagePromptForm />
+      <VideoPromptForm />
     </div>
   );
 }
