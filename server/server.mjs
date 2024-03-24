@@ -1,17 +1,18 @@
 import express from "express";
 import fetch from 'node-fetch';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 const port = 4000;
+const __dirname = path.dirname(fileURLToPath(import.meta.url)); // Define __dirname since ES modules don't provide it by default
 
 app.use(cors());
 app.use(express.json()); // For parsing application/json
 
-// Serve the HTML Form at the root URL
-app.get('/', (req, res) => {
-  res.send('API is running. Use POST /generate-image to generate an image.');
-});
+// Serve static files from 'public' directory
+app.use(express.static(path.join(__dirname, 'public'))); // Assuming your 'index.html' is in a directory named 'public'
 
 // Handle the image generation
 app.post('/generate-image', async (req, res) => {
@@ -20,7 +21,7 @@ app.post('/generate-image', async (req, res) => {
       method: "POST",
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
-        "prompt": "girl",
+        "prompt": req.body.prompt, // Use the prompt from the request body
         "negative_prompt": "CGI, Unreal, Airbrushed, Digital",
         "seed": -1,
         "steps": 20,
