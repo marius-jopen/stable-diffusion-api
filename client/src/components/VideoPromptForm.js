@@ -293,6 +293,7 @@ export default function VideoPromptForm() {
 
   return (
     <form onSubmit={handleSubmit}>
+      <h1>Generate Video</h1>
       <div>
         <label htmlFor="prompt">Enter your video prompt:</label>
         <input
@@ -314,7 +315,7 @@ export default function VideoPromptForm() {
           onChange={(e) => setNegativePrompt(e.target.value)}
         />
       </div>
-      <input type="submit" value="Generate Image" />
+      <input type="submit" value="Generate Video" />
     </form>
   );
 }

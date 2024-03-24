@@ -44,6 +44,7 @@ export default function ImagePromptForm() {
 
   return (
     <form onSubmit={handleSubmit}>
+      <h1>Generate Image</h1>
       <div>
         <label htmlFor="prompt">Enter your prompt:</label>
         <input
