@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 export default function BundestagPromptsForm() {
   // Update initial state to include a negativePrompt field
   const [maxFrames, setMaxFrames] = useState('');
-  const [positivePrompts1, setPositivePrompts1] = useState('');
-  const [negativePrompts1, setNegativePrompts1] = useState('');
+  const [positivePrompts1] = useState('');
+  const [negativePrompts1] = useState('');
   const [positivePrompts2, setPositivePrompts2] = useState('');
   const [negativePrompts2, setNegativePrompts2] = useState('');
   
@@ -12,7 +12,7 @@ export default function BundestagPromptsForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const keyframe = Math.floor(parseInt(maxFrames, 10) / 2);
+    const keyframe = Math.floor(parseInt(maxFrames, 10) / 4);
 
     const parameters = {
       deforum_settings: {
@@ -46,7 +46,7 @@ export default function BundestagPromptsForm() {
   return (
     <form onSubmit={handleSubmit}>
       <h1>Bundestag Video</h1>
-      <div>
+      {/* <div>
         <label htmlFor="maxFrames">Positive Prompts 1:</label>
         <input
           type="text"
@@ -65,7 +65,7 @@ export default function BundestagPromptsForm() {
           value={negativePrompts1}
           onChange={(e) => setNegativePrompts1(e.target.value)}
         />
-      </div>
+      </div> */}
       <div>
         <label htmlFor="maxFrames">Positive Prompts 2:</label>
         <input

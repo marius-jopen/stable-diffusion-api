@@ -78,25 +78,29 @@ class Bundestag {
 
   async generateBundestag(parameters) {
     try {
-        const nextBatchNumber = await this.getNextBatchNumber();
-        
-        // Pass nextBatchNumber to readSecondLastPrompt
-        const secondLastPrompt = await this.readSecondLastPrompt(nextBatchNumber);
-        
-        if (secondLastPrompt !== false) {
-            console.log("Second Last Prompt:", secondLastPrompt);
-            // Optionally use secondLastPrompt here
-        }
+      const nextBatchNumber = await this.getNextBatchNumber();
+      
+      // Pass nextBatchNumber to readSecondLastPrompt
+      const secondLastPrompt = await this.readSecondLastPrompt(nextBatchNumber);
+      
+      if (secondLastPrompt !== false) {
+          console.log("Second Last Prompt:", secondLastPrompt);
+          // Optionally use secondLastPrompt here
+      }
 
       const batchName = `BT_${String(nextBatchNumber).padStart(4, '0')}`;
       console.log(`Processing for batch: ${batchName}`); // Log the batch folder being processed/created
 
       const seed = Math.floor(Math.random() * 100) + 1;
 
+      let prompts = parameters.deforum_settings?.prompts || {};
+      prompts["0"] = secondLastPrompt;
+
       const modifiedParameters = {
         ...parameters,
         deforum_settings: {
           ...parameters.deforum_settings,
+          "prompts": prompts,
           "batch_name": batchName,
           "seed": seed,
           "W": 1024,
