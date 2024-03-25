@@ -1,15 +1,37 @@
 import fetch from 'node-fetch';
+import fs from 'fs';
+import path from 'path';
 
 class Bundestag {
   constructor(outputDir) {
     this.outputDir = outputDir;
   }
 
+  async getNextBatchNumber() {
+    const outputDir = this.outputDir;
+    return new Promise((resolve, reject) => {
+      fs.readdir(outputDir, (err, files) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        const batchNumbers = files
+          .map(file => file.match(/^BT_(\d+)$/)) // Match only the expected pattern
+          .filter(result => result !== null) // Remove non-matching files
+          .map(result => parseInt(result[1], 10)) // Convert to number
+          .sort((a, b) => a - b); // Sort numerically
+
+        const nextBatchNumber = batchNumbers.length > 0 ? Math.max(...batchNumbers) + 1 : 1;
+        resolve(nextBatchNumber);
+      });
+    });
+  }
+
   async generateBundestag(parameters) {
     try {
       // Dynamically set the batch_name or other parameters
-      const currentTime = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14);
-      const batchName = `BT_${currentTime}`;
+      const nextBatchNumber = await this.getNextBatchNumber();
+      const batchName = `BT_${String(nextBatchNumber).padStart(4, '0')}`; // Format to BT_XXXX
       const seed = Math.floor(Math.random() * 100) + 1;
 
       // Override or add specific settings within deforum_settings

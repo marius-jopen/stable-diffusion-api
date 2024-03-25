@@ -15,10 +15,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Output directories for images and videos
 const imageOutputDir = path.join(__dirname, '..', 'output', 'txt2img');
 
+// The correct path for the Bundestag output directory
+const bundestagOutputDir = 'E:\\output\\sd-api';
+
 // Instantiate both generators
 const imageGenerator = new ImageGenerator(imageOutputDir);
 const videoGenerator = new VideoGenerator(); // Create an instance of VideoGenerator
-const bundestagGenerator = new BundestagGenerator(); // Create an instance of BundestagGenerator
+const bundestagGenerator = new BundestagGenerator(bundestagOutputDir); // Create an instance of BundestagGenerator
 
 app.use(cors());
 app.use(express.json());
