@@ -7,6 +7,31 @@ class Bundestag {
     this.outputDir = outputDir;
   }
 
+  async getLastImagePathFromPreviousBatch(nextBatchNumber) {
+    if (nextBatchNumber <= 1) {
+        console.log("No previous batch exists for BT_0001.");
+        return null; // Early return as there's no previous batch for BT_0001
+    }
+
+    const prevBatchNumber = nextBatchNumber - 1;
+    const prevBatchFolderName = `BT_${String(prevBatchNumber).padStart(4, '0')}`;
+    const prevBatchFolderPath = path.join(this.outputDir, prevBatchFolderName);
+
+    try {
+        const files = await fs.promises.readdir(prevBatchFolderPath);
+        const imageFiles = files.filter(file => file.match(/\.(jpg|jpeg|png|gif)$/i)).sort();
+        if (imageFiles.length === 0) {
+            console.log(`No image files found in ${prevBatchFolderPath}.`);
+            return null;
+        }
+        const lastImageFile = imageFiles[imageFiles.length - 1];
+        return path.join(prevBatchFolderPath, lastImageFile);
+    } catch (error) {
+        console.error(`Error accessing previous batch folder: ${prevBatchFolderPath}`, error);
+        return null;
+    }
+  }
+
   async getNextBatchNumber() {
     return new Promise((resolve, reject) => {
       fs.readdir(this.outputDir, (err, files) => {
@@ -79,30 +104,44 @@ class Bundestag {
   async generateBundestag(parameters) {
     try {
       const nextBatchNumber = await this.getNextBatchNumber();
-      
-      // Pass nextBatchNumber to readSecondLastPrompt
-      const secondLastPrompt = await this.readSecondLastPrompt(nextBatchNumber);
-      
-      if (secondLastPrompt !== false) {
-          console.log("Second Last Prompt:", secondLastPrompt);
-          // Optionally use secondLastPrompt here
-      }
-
-      const batchName = `BT_${String(nextBatchNumber).padStart(4, '0')}`;
-      console.log(`Processing for batch: ${batchName}`); // Log the batch folder being processed/created
-
-      const seed = Math.floor(Math.random() * 100) + 1;
-
+      let useInit = false; // Default to false, will be updated for batches after BT_0001
+      let initImagePath = null; // Default to null, will be updated for batches after BT_0001
       let prompts = parameters.deforum_settings?.prompts || {};
-      prompts["0"] = secondLastPrompt;
-
+  
+      // Handle prompts for BT_0001 specifically
+      if (nextBatchNumber === 1) {
+        // Find the second prompt's key assuming the keyframe or any prompt is the one to duplicate
+        const secondPromptKey = Object.keys(prompts).sort((a, b) => parseInt(a) - parseInt(b))[1] || "0"; // Fallback to "0" if not found
+        const secondPromptValue = prompts[secondPromptKey];
+        prompts["0"] = secondPromptValue; // Ensure the first prompt has the value of the second prompt
+        // Update any other key to have the same value as the second prompt
+        for (const key in prompts) {
+          prompts[key] = secondPromptValue;
+        }
+      } else {
+        // Logic for batches after BT_0001
+        if (await this.getLastImagePathFromPreviousBatch(nextBatchNumber)) {
+          useInit = true;
+          initImagePath = await this.getLastImagePathFromPreviousBatch(nextBatchNumber);
+        }
+        const secondLastPrompt = await this.readSecondLastPrompt(nextBatchNumber);
+        if (secondLastPrompt !== false) {
+          prompts["0"] = secondLastPrompt;
+        }
+      }
+  
+      const batchName = `BT_${String(nextBatchNumber).padStart(4, '0')}`;
+      console.log(`Processing for batch: ${batchName}`);
+  
       const modifiedParameters = {
         ...parameters,
         deforum_settings: {
           ...parameters.deforum_settings,
-          "prompts": prompts,
-          "batch_name": batchName,
-          "seed": seed,
+          prompts,
+          batch_name: batchName,
+          use_init: useInit,
+          init_image: initImagePath,
+          "seed": 1,
           "W": 1024,
           "H": 1024,
           "show_info_on_ui": true,
@@ -114,10 +153,8 @@ class Bundestag {
           "steps": 25,
           "seed_behavior": "iter",
           "seed_iter_N": 1,
-          "use_init": false,
-          "strength": 0.8,
+          "strength": 1,
           "strength_0_no_init": true,
-          "init_image": null,
           "use_mask": false,
           "use_alpha_as_mask": false,
           "mask_file": "https://deforum.github.io/a1/M1.jpg",

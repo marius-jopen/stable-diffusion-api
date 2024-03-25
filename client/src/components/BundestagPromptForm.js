@@ -4,21 +4,19 @@ export default function BundestagPromptsForm() {
   // Update initial state to include a negativePrompt field
   const [maxFrames, setMaxFrames] = useState('');
   const [positivePrompts1] = useState('');
-  const [negativePrompts1] = useState('');
   const [positivePrompts2, setPositivePrompts2] = useState('');
-  const [negativePrompts2, setNegativePrompts2] = useState('');
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const keyframe = Math.floor(parseInt(maxFrames, 10) / 4);
+    const negativePrompts = "(worst quality, low quality, normal quality, lowres, low details, oversaturated, undersaturated, overexposed, underexposed, grayscale, bw, bad photo, bad photography, bad art:1.4), (watermark, signature, text font, username, error, logo, words, letters, digits, autograph, trademark, name:1.2), (bad hands, bad anatomy, bad body, bad face, bad teeth, bad arms, bad legs, deformities:1.3), morbid, ugly, mutated malformed, mutilated, poorly lit, bad shadow, draft, cropped, out of frame, cut off, censored, jpeg artifacts, glitch, duplicate"
 
     const parameters = {
       deforum_settings: {
         "prompts": {
-          "0": positivePrompts1 + " --neg " + negativePrompts1,
-          [keyframe.toString()]: positivePrompts2 + " --neg " + negativePrompts2  // Use the calculated keyframe
+          "0": positivePrompts1 + " --neg " + negativePrompts,
+          [keyframe.toString()]: positivePrompts2 + " --neg " + negativePrompts  // Use the calculated keyframe
         },
         "max_frames": parseInt(maxFrames, 10),
       }
@@ -46,44 +44,14 @@ export default function BundestagPromptsForm() {
   return (
     <form onSubmit={handleSubmit}>
       <h1>Bundestag Video</h1>
-      {/* <div>
-        <label htmlFor="maxFrames">Positive Prompts 1:</label>
-        <input
-          type="text"
-          id="positivePrompts1"
-          name="positivePrompts1"
-          value={positivePrompts1}
-          onChange={(e) => setPositivePrompts1(e.target.value)}
-        />
-      </div>
       <div>
-        <label htmlFor="maxFrames">Negative Prompts 1:</label>
-        <input
-          type="text"
-          id="negativePrompts1"
-          name="negativePrompts1"
-          value={negativePrompts1}
-          onChange={(e) => setNegativePrompts1(e.target.value)}
-        />
-      </div> */}
-      <div>
-        <label htmlFor="maxFrames">Positive Prompts 2:</label>
+        <label htmlFor="maxFrames">Prompts:</label>
         <input
           type="text"
           id="positivePrompts2"
           name="positivePrompts2"
           value={positivePrompts2}
           onChange={(e) => setPositivePrompts2(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="maxFrames">Negative Prompts 2:</label>
-        <input
-          type="text"
-          id="negativePrompts2"
-          name="negativePrompts2"
-          value={negativePrompts2}
-          onChange={(e) => setNegativePrompts2(e.target.value)}
         />
       </div>
       <div>
