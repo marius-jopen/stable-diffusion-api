@@ -76,14 +76,12 @@ export default function VideoPromptForm() {
             type="text"
             value={prompt.prompt}
             onChange={(e) => handleChangePrompt(index, 'prompt', e.target.value)}
-            required
           />
           <label>Negative Prompt:</label>
           <input
             type="text"
             value={prompt.negativePrompt}
             onChange={(e) => handleChangePrompt(index, 'negativePrompt', e.target.value)}
-            required
           />
           {index > 0 && (
             <button type="button" onClick={() => handleRemovePrompt(index)}>
