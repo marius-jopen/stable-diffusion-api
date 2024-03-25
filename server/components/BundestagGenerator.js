@@ -8,18 +8,17 @@ class Bundestag {
   }
 
   async getNextBatchNumber() {
-    const outputDir = this.outputDir;
     return new Promise((resolve, reject) => {
-      fs.readdir(outputDir, (err, files) => {
+      fs.readdir(this.outputDir, (err, files) => {
         if (err) {
           reject(err);
           return;
         }
         const batchNumbers = files
-          .map(file => file.match(/^BT_(\d+)$/)) // Match only the expected pattern
-          .filter(result => result !== null) // Remove non-matching files
-          .map(result => parseInt(result[1], 10)) // Convert to number
-          .sort((a, b) => a - b); // Sort numerically
+          .map(file => file.match(/^BT_(\d+)$/))
+          .filter(result => result !== null)
+          .map(result => parseInt(result[1], 10))
+          .sort((a, b) => a - b);
 
         const nextBatchNumber = batchNumbers.length > 0 ? Math.max(...batchNumbers) + 1 : 1;
         resolve(nextBatchNumber);
@@ -27,19 +26,78 @@ class Bundestag {
     });
   }
 
+  async readSecondLastPrompt(nextBatchNumber) {
+    if (nextBatchNumber <= 1) {
+        // If this is the first batch, there's no previous batch to read from.
+        console.log("Generating BT_0001: No previous prompts to fetch because this is the first batch.");
+        return false;
+    }
+
+    // Calculate the target folder name based on the current batch number.
+    const targetBatchNumber = nextBatchNumber - 1;
+    const targetFolderName = `BT_${String(targetBatchNumber).padStart(4, '0')}`;
+    console.log(`Attempting to read prompts from: ${targetFolderName}`);
+
+    // Construct the path to the target folder.
+    const targetFolderPath = path.join(this.outputDir, targetFolderName);
+    const txtFiles = fs.readdirSync(targetFolderPath)
+        .filter(file => path.extname(file).toLowerCase() === '.txt');
+
+    if (txtFiles.length === 0) {
+        console.log(`No .txt file found in ${targetFolderName}.`);
+        return false;
+    }
+
+    // Assume the first txt file is the correct one to read from.
+    const promptsFilePath = path.join(targetFolderPath, txtFiles[0]);
+    try {
+        const promptsContent = fs.readFileSync(promptsFilePath, 'utf-8');
+        const promptsJson = JSON.parse(promptsContent);
+
+        if (promptsJson.prompts) {
+            // Assuming the structure contains a "prompts" key.
+            const keys = Object.keys(promptsJson.prompts);
+            if (keys.length < 2) {
+                console.log(`Not enough prompts in ${targetFolderName} to fetch the second one.`);
+                return false;
+            }
+            // Fetch the second prompt.
+            const secondPromptKey = keys[1]; // Use the second key in the list.
+            const secondPrompt = promptsJson.prompts[secondPromptKey];
+            console.log(`In ${targetFolderName}, the second prompt is "${secondPrompt}"`);
+            return secondPrompt;
+        } else {
+            console.log(`Prompts object not found in ${targetFolderName}.`);
+            return false;
+      }
+    } catch (error) {
+      console.error(`Error reading or parsing the prompts file in ${targetFolderName}:`, error);
+      return false;
+    }
+  }
+
   async generateBundestag(parameters) {
     try {
-      // Dynamically set the batch_name or other parameters
-      const nextBatchNumber = await this.getNextBatchNumber();
-      const batchName = `BT_${String(nextBatchNumber).padStart(4, '0')}`; // Format to BT_XXXX
+        const nextBatchNumber = await this.getNextBatchNumber();
+        
+        // Pass nextBatchNumber to readSecondLastPrompt
+        const secondLastPrompt = await this.readSecondLastPrompt(nextBatchNumber);
+        
+        if (secondLastPrompt !== false) {
+            console.log("Second Last Prompt:", secondLastPrompt);
+            // Optionally use secondLastPrompt here
+        }
+
+      const batchName = `BT_${String(nextBatchNumber).padStart(4, '0')}`;
+      console.log(`Processing for batch: ${batchName}`); // Log the batch folder being processed/created
+
       const seed = Math.floor(Math.random() * 100) + 1;
 
-      // Override or add specific settings within deforum_settings
       const modifiedParameters = {
         ...parameters,
         deforum_settings: {
           ...parameters.deforum_settings,
-          "batch_name": batchName, // Override the batch_name with the server-generated one
+          "batch_name": batchName,
           "seed": seed,
           "W": 1024,
           "H": 1024,
@@ -290,10 +348,11 @@ class Bundestag {
           "sd_model_name": "juggernautXL_v9Rundiffusionphoto2.safetensors",
           "sd_model_hash": "799b5005",
           "deforum_git_commit_id": "32242685"
-          // Add or modify other parameters as needed
+          // The rest of your settings remain unchanged
         },
       };
 
+      // Proceed with the fetch call to generate the batch
       const response = await fetch("http://127.0.0.1:7860/deforum_api/batches", {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
@@ -301,16 +360,17 @@ class Bundestag {
       });
 
       const jsonResponse = await response.json();
-      console.log(jsonResponse); // Log the entire response
-      
+      // console.log(jsonResponse);
+
       return {
-        message: "Check the console for the logged response.",
+        message: "Batch generation initiated. Check console for response details.",
         info: "Operation completed successfully!"
       };
     } catch (error) {
       console.error('Error in Bundestag:', error);
-      throw error; // Re-throw the error to handle it in the calling code
+      throw error;
     }
   }
 }
+
 export default Bundestag;
