@@ -2,40 +2,24 @@ import React, { useState } from 'react';
 
 export default function BundestagPromptsForm() {
   // Update initial state to include a negativePrompt field
-  const [prompts, setPrompts] = useState([{ index: '0', prompt: '', negativePrompt: '' }]);
   const [maxFrames, setMaxFrames] = useState('');
-
-  const handleAddPrompt = () => {
-    // Include a negativePrompt field for new prompts
-    setPrompts([...prompts, { index: '', prompt: '', negativePrompt: '' }]);
-  };
-
-  const handleRemovePrompt = (indexToRemove) => {
-    setPrompts(prompts.filter((_, index) => index !== indexToRemove));
-  };
-
-  const handleChangePrompt = (index, field, value) => {
-    const newPrompts = prompts.map((prompt, i) => {
-      if (i === index) {
-        return { ...prompt, [field]: value };
-      }
-      return prompt;
-    });
-    setPrompts(newPrompts);
-  };
+  const [positivePrompts1, setPositivePrompts1] = useState('');
+  const [negativePrompts1, setNegativePrompts1] = useState('');
+  const [positivePrompts2, setPositivePrompts2] = useState('');
+  const [negativePrompts2, setNegativePrompts2] = useState('');
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Format prompts to include the negative prompt as specified
-    const promptsObject = prompts.reduce((acc, { index, prompt, negativePrompt }) => {
-      acc[index] = `${prompt} --neg ${negativePrompt}`;
-      return acc;
-    }, {});
+    const keyframe = Math.floor(parseInt(maxFrames, 10) / 2);
 
     const parameters = {
       deforum_settings: {
-        "prompts": promptsObject,
+        "prompts": {
+          "0": positivePrompts1 + " --neg " + negativePrompts1,
+          [keyframe.toString()]: positivePrompts2 + " --neg " + negativePrompts2  // Use the calculated keyframe
+        },
         "max_frames": parseInt(maxFrames, 10),
       }
     };
@@ -62,37 +46,46 @@ export default function BundestagPromptsForm() {
   return (
     <form onSubmit={handleSubmit}>
       <h1>Bundestag Video</h1>
-      {prompts.map((prompt, index) => (
-        <div key={index}>
-          <label>Frame Index:</label>
-          <input
-            type="text"
-            value={prompt.index}
-            onChange={(e) => handleChangePrompt(index, 'index', e.target.value)}
-            required
-          />
-          <label>Prompt:</label>
-          <input
-            type="text"
-            value={prompt.prompt}
-            onChange={(e) => handleChangePrompt(index, 'prompt', e.target.value)}
-          />
-          <label>Negative Prompt:</label>
-          <input
-            type="text"
-            value={prompt.negativePrompt}
-            onChange={(e) => handleChangePrompt(index, 'negativePrompt', e.target.value)}
-          />
-          {index > 0 && (
-            <button type="button" onClick={() => handleRemovePrompt(index)}>
-              Remove
-            </button>
-          )}
-        </div>
-      ))}
-      <button type="button" onClick={handleAddPrompt}>
-        Add Prompt
-      </button>
+      <div>
+        <label htmlFor="maxFrames">Positive Prompts 1:</label>
+        <input
+          type="text"
+          id="positivePrompts1"
+          name="positivePrompts1"
+          value={positivePrompts1}
+          onChange={(e) => setPositivePrompts1(e.target.value)}
+        />
+      </div>
+      <div>
+        <label htmlFor="maxFrames">Negative Prompts 1:</label>
+        <input
+          type="text"
+          id="negativePrompts1"
+          name="negativePrompts1"
+          value={negativePrompts1}
+          onChange={(e) => setNegativePrompts1(e.target.value)}
+        />
+      </div>
+      <div>
+        <label htmlFor="maxFrames">Positive Prompts 2:</label>
+        <input
+          type="text"
+          id="positivePrompts2"
+          name="positivePrompts2"
+          value={positivePrompts2}
+          onChange={(e) => setPositivePrompts2(e.target.value)}
+        />
+      </div>
+      <div>
+        <label htmlFor="maxFrames">Negative Prompts 2:</label>
+        <input
+          type="text"
+          id="negativePrompts2"
+          name="negativePrompts2"
+          value={negativePrompts2}
+          onChange={(e) => setNegativePrompts2(e.target.value)}
+        />
+      </div>
       <div>
         <label htmlFor="maxFrames">Max Frames:</label>
         <input
