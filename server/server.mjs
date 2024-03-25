@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import ImageGenerator from './components/ImageGenerator.js'; // Existing ImageGenerator import
 import VideoGenerator from './components/VideoGenerator.js'; // Import the VideoGenerator
+import BundestagGenerator from './components/BundestagGenerator.js'; // Import the BundestagGenerator
 
 const app = express();
 const port = 4000;
@@ -13,11 +14,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Output directories for images and videos
 const imageOutputDir = path.join(__dirname, '..', 'output', 'txt2img');
-const videoOutputDir = path.join(__dirname, '..', 'output', 'txt2vid');
 
 // Instantiate both generators
 const imageGenerator = new ImageGenerator(imageOutputDir);
-const videoGenerator = new VideoGenerator(videoOutputDir); // Create an instance of VideoGenerator
+const videoGenerator = new VideoGenerator(); // Create an instance of VideoGenerator
+const bundestagGenerator = new BundestagGenerator(); // Create an instance of BundestagGenerator
 
 app.use(cors());
 app.use(express.json());
@@ -44,6 +45,18 @@ app.post('/generate-video', async (req, res) => {
     res.status(500).json({ message: 'Error generating or saving the video.' });
   }
 });
+
+// New route for bundestag generation
+app.post('/generate-bundestag', async (req, res) => {
+  try {
+    const { videoUrl, info } = await bundestagGenerator.generateBundestag(req.body);
+    res.json({ videos: [videoUrl], info });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ message: 'Error generating or saving the video.' });
+  }
+});
+
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
