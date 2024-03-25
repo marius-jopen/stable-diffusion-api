@@ -41,7 +41,7 @@ export default function BundestagPromptsForm() {
     };
 
     try {
-      const response = await fetch('/generate-video', {
+      const response = await fetch('/generate-bundestag', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -49,8 +49,8 @@ app.post('/generate-video', async (req, res) => {
 // New route for bundestag generation
 app.post('/generate-bundestag', async (req, res) => {
   try {
-    const { videoUrl, info } = await bundestagGenerator.generateBundestag(req.body);
-    res.json({ videos: [videoUrl], info });
+    const { btUrl, info } = await bundestagGenerator.generateBundestag(req.body);
+    res.json({ bts: [btUrl], info });
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ message: 'Error generating or saving the video.' });
