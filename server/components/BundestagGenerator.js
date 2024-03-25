@@ -132,6 +132,9 @@ class Bundestag {
   
       const batchName = `BT_${String(nextBatchNumber).padStart(4, '0')}`;
       console.log(`Processing for batch: ${batchName}`);
+      const positivePrompts = ""
+      const negativePrompts = "(worst quality, low quality, normal quality, lowres, low details, oversaturated, undersaturated, overexposed, underexposed, grayscale, bw, bad photo, bad photography, bad art:1.4), (watermark, signature, text font, username, error, logo, words, letters, digits, autograph, trademark, name:1.2), (bad hands, bad anatomy, bad body, bad face, bad teeth, bad arms, bad legs, deformities:1.3), morbid, ugly, mutated malformed, mutilated, poorly lit, bad shadow, draft, cropped, out of frame, cut off, censored, jpeg artifacts, glitch, duplicate"
+
   
       const modifiedParameters = {
         ...parameters,
@@ -171,13 +174,13 @@ class Bundestag {
           "motion_preview_mode": false,
           "positive_prompts": "",
           "negative_prompts": "",
-          "animation_mode": "2D",
+          "animation_mode": "3D",
           "border": "replicate",
           "angle": "0: (0)",
           "zoom": "0: (1.0025+0.002*sin(1.25*3.14*t/30))",
           "translation_x": "0: (0)",
           "translation_y": "0: (0)",
-          "translation_z": "0: (1.75)",
+          "translation_z": "0: (0.5)",
           "transform_center_x": "0: (0.5)",
           "transform_center_y": "0: (0.5)",
           "rotation_3d_x": "0: (0)",
@@ -225,13 +228,13 @@ class Bundestag {
           "kernel_schedule": "0: (5)",
           "sigma_schedule": "0: (1)",
           "threshold_schedule": "0: (0)",
-          "color_coherence": "LAB",
+          "color_coherence": "None",
           "color_coherence_image_path": "",
           "color_coherence_video_every_N_frames": 1,
           "color_force_grayscale": false,
           "legacy_colormatch": false,
-          "diffusion_cadence": 2,
-          "optical_flow_cadence": "None",
+          "diffusion_cadence": 3,
+          "optical_flow_cadence": "RAFT",
           "cadence_flow_factor_schedule": "0: (1)",
           "optical_flow_redo_generation": "None",
           "redo_flow_factor_schedule": "0: (1)",
