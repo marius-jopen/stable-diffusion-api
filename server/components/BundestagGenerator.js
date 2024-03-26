@@ -7,6 +7,42 @@ class Bundestag {
     this.outputDir = outputDir;
   }
 
+  // Define the base configuration as a static property or method
+  static baseConfig = {
+    seed: 1,
+    steps: 20,
+    width: 1024,
+    height: 1024,
+    cfgScale: 7,
+    samplerName: "Euler a",
+  };
+
+  // Static method to adapt baseConfig for image generation
+  static getImageConfig() {
+    const { seed, steps, width, height, cfgScale, samplerName } = this.baseConfig;
+    return {
+      seed,
+      steps,
+      width: width,
+      height: height,
+      cfg_scale: cfgScale,
+      sampler_name: samplerName,
+    };
+  }
+
+  // Static method to adapt baseConfig for video generation
+  static getVideoConfig() {
+    const { seed, steps, width, height, cfgScale, samplerName } = this.baseConfig;
+    return {
+      seed,
+      steps,
+      W: width,
+      H: height,
+      cfg_scale_schedule: "0: (" + cfgScale + ")",
+      sampler: samplerName, // Adjust the key name as per your API's requirement
+    };
+  }
+
   async getLastImagePathFromPreviousBatch(nextBatchNumber) {
     if (nextBatchNumber <= 1) {
         console.log("No previous batch exists for BT_0001.");
@@ -133,24 +169,22 @@ class Bundestag {
       const batchName = `BT_${String(nextBatchNumber).padStart(4, '0')}`;
       console.log(`Processing for batch: ${batchName}`);
   
+      const videoConfig = Bundestag.getVideoConfig();
+
       const modifiedParameters = {
         ...parameters,
         deforum_settings: {
           ...parameters.deforum_settings,
+          ...videoConfig,
           prompts,
           batch_name: batchName,
           use_init: useInit,
           init_image: initImagePath,
-          "seed": 1,
-          "W": 1024,
-          "H": 1024,
           "show_info_on_ui": true,
           "tiling": false,
           "restore_faces": false,
           "seed_resize_from_w": 0,
           "seed_resize_from_h": 0,
-          "sampler": "Euler a",
-          "steps": 25,
           "seed_behavior": "iter",
           "seed_iter_N": 1,
           "strength": 1,
@@ -191,7 +225,6 @@ class Bundestag {
           "noise_schedule": "0: (0.065)",
           "strength_schedule": "0: (0.65)",
           "contrast_schedule": "0: (1.0)",
-          "cfg_scale_schedule": "0: (7)",
           "enable_steps_scheduling": false,
           "steps_schedule": "0: (25)",
           "fov_schedule": "0: (70)",
@@ -413,7 +446,22 @@ class Bundestag {
     }
   }
 
-  async generateImage(parameters) {
+  async generateImage(dynamicParameters) {
+
+    const imageConfig = Bundestag.getImageConfig();
+
+    const staticParameters = {
+      // n_iter: 1,
+      // batch_size: 1,
+    };
+
+    // Merge dynamic and static parameters
+    const parameters = {
+      ...dynamicParameters,
+      ...staticParameters,
+      ...imageConfig,
+    };
+
     try {
       const response = await fetch("http://127.0.0.1:7860/sdapi/v1/txt2img", {
         method: "POST",
