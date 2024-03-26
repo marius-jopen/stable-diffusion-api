@@ -60,6 +60,17 @@ app.post('/generate-bundestag', async (req, res) => {
   }
 });
 
+// New route for Bundestag image generation
+app.post('/generate-bundestag-image', async (req, res) => {
+  try {
+    const { imageUrl, info } = await bundestagGenerator.generateImage(req.body);
+    res.json({ images: [imageUrl], info });
+  } catch (error) {
+    console.error('Error in generate-bundestag-image:', error);
+    res.status(500).json({ message: 'Error generating or saving the Bundestag image.' });
+  }
+});
+
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
