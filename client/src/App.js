@@ -4,6 +4,7 @@ import VideoPromptForm from './components/VideoPromptForm';
 import BundestagPromptForm from './components/BundestagPromptForm';
 import BundestagImagePromptForm from './components/BundestagImagePromptForm';
 import BundestagForm from './components/BundestagForm';
+import BundestagLooper from './components/BundestagLooper';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       {/* <BundestagPromptForm/> */}
       {/* <BundestagImagePromptForm/> */}
       <BundestagForm/>
+      <BundestagLooper/>
     </div>
   );
 }

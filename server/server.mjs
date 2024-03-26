@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import ImageGenerator from './components/ImageGenerator.js'; // Existing ImageGenerator import
 import VideoGenerator from './components/VideoGenerator.js'; // Import the VideoGenerator
 import BundestagGenerator from './components/BundestagGenerator.js'; // Import the BundestagGenerator
+import BundestagLooper from './components/BundestagLooper.js'; // Import the new component
 
 const app = express();
 const port = 4000;
@@ -23,9 +24,39 @@ const imageGenerator = new ImageGenerator(imageOutputDir);
 const videoGenerator = new VideoGenerator(); // Create an instance of VideoGenerator
 const bundestagGenerator = new BundestagGenerator(bundestagOutputDir); // Create an instance of BundestagGenerator
 
+
+// Adjust the path to your actual base directory for the Bundestag images
+const baseDir = 'E:\\output\\sd-api';
+const bundestagLooper = new BundestagLooper(baseDir);
+
+// Serve images dynamically from their path
+app.get('/images/*', (req, res) => {
+  const filePath = req.params[0].replace(/\\/g, '/'); // Ensure we use forward slashes
+  const absolutePath = path.join(baseDir, filePath);
+  res.sendFile(absolutePath, (err) => {
+    if (err) {
+      console.log(err);
+      res.status(404).send('Image not found');
+    }
+  });
+});
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+
+// Add a new route to serve the images
+app.get('/list-bundestag-images', async (req, res) => {
+  try {
+    const images = await bundestagLooper.findAllPngImages();
+    res.json(images);
+  } catch (error) {
+    console.error('Error listing Bundestag images:', error);
+    res.status(500).json({ message: 'Error listing Bundestag images.' });
+  }
+});
+
 
 // Existing route for image generation
 app.post('/generate-image', async (req, res) => {
